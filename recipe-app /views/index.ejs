@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe App</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    
+</head>
+
+    <div class="container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1>Recipes</h1>
+          </div>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/authors">View Authors</a></li>
+        <li><a href="/ingredients">View Ingredients</a></li>
+        <li id="sortByIngredients"><a href="/">Sort by number of ingredients</a></li>
+        <li><a href="/recipes-by-skill-level">Sort by skill level</a></li>
+      </ul>
+    </nav>
+    <main>
+        <header>
+    <form action="/" method="GET">
+      <input type="text" name="search" placeholder="Search by recipe name" value="<%= search || '' %>">
+      <button type="submit">Search</button>
+    </form>
+  </header>
+<body>
+    
+    </form>
+  
+    
+    <table border="1" id="recipeTable">
+        <tr>
+            <th>Name</th>
+            <th>Author</th>
+            <th>Number of Ingredients</th>
+            <th>Skill Level</th>
+            <th>Actions</th>
+        </tr>
+        <% recipeTableHTML.forEach(recipe => { %>
+            <tr data-description="<%= recipe.description %>" 
+                data-ingredients="<%= (recipe.ingredients || []).join(', ') %>" 
+                data-cooking-time="<%= recipe.cookingTime %>" 
+                data-preparation-time="<%= recipe.preparationTime %>">
+                <td><%= recipe.name %></td>
+                <td><%= recipe.author %></td>
+                <td><%= recipe.numberOfIngredients %></td>
+                <td><%= recipe.skillLevel %></td>
+                <td><button class="recipe-details-button" data-id="<%= recipe.id %>">View Details</button></td>
+            </tr>
+            
+        <% }); %>
+    </table>
+
+    <div id="recipeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="recipeDetails"></div>
+        </div>
+    </div>
+
+    <script src="/scripts.js"> </script>
+</body>
+</html>
