@@ -186,3 +186,76 @@ async function filterRecipes() {
         console.error('Error fetching recipes:', error);
     }
 }
+
+
+function sortRecipesBy(option) {
+    const recipeTable = document.getElementById('recipeTable').getElementsByTagName('tbody')[0];
+    const recipeRows = Array.from(recipeTable.getElementsByTagName('tr'));
+
+    let sortFunction;
+    switch(option) {
+        case 'name':
+            sortFunction = (a, b) => a.cells[0].textContent.localeCompare(b.cells[0].textContent);
+            break;
+        case 'skillLevel':
+            sortFunction = (a, b) => {
+                const aLevel = a.cells[3].textContent;
+                const bLevel = b.cells[3].textContent;
+                return aLevel.localeCompare(bLevel);
+            };
+            break;
+        case 'numberOfIngredients':
+            sortFunction = (a, b) => {
+                const aIngredients = parseInt(a.cells[2].textContent);
+                const bIngredients = parseInt(b.cells[2].textContent);
+                return aIngredients - bIngredients;
+            };
+            break;
+        default:
+            return;
+    }
+
+    const sortedRows = recipeRows.slice().sort(sortFunction);
+    sortedRows.forEach(row => {
+        recipeTable.appendChild(row);
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sortByDropdown = document.getElementById('sortBy');
+
+    sortByDropdown.addEventListener('change', function() {
+        const selectedOption = this.value;
+        sortRecipesBy(selectedOption);
+    });
+});
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const pagination = document.querySelector(".pagination");
+    const currentPage = parseInt("<%= currentPage %>");
+    const totalPages = parseInt("<%= totalPages %>");
+
+    pagination.addEventListener("click", function(event) {
+        event.preventDefault();
+        const target = event.target;
+
+        if (target.tagName === "A") {
+            const page = parseInt(target.textContent);
+
+            if (!isNaN(page)) {
+                window.location.href = `/?page=${page}`;
+            } else if (target.textContent === "«") {
+                if (currentPage > 1) {
+                    window.location.href = `/?page=${currentPage - 1}`;
+                }
+            } else if (target.textContent === "»") {
+                if (currentPage < totalPages) {
+                    window.location.href = `/?page=${currentPage + 1}`;
+                }
+            }
+        }
+    });
+});

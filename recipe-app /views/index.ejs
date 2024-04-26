@@ -18,7 +18,6 @@
         <li><a href="/authors">View Authors</a></li>
         <li><a href="/ingredients">View Ingredients</a></li>
         <li id="sortByIngredients"><a href="/">Sort by number of ingredients</a></li>
-        <li><a href="/recipes-by-skill-level">Sort by skill level</a></li>
       </ul>
     </nav>
     <main>
@@ -27,13 +26,15 @@
       <input type="text" name="search" placeholder="Search by recipe name" value="<%= search || '' %>">
       <button type="submit">Search</button>
     </form>
-  </header>
-<body>
-    
-    </form>
-  
-    
-    <table border="1" id="recipeTable">
+</header>
+<label for="sortBy">Sort by:</label>
+<select id="sortBy">
+    <option value="name">Alphabetical</option>
+    <option value="skillLevel">Skill Level</option>
+    <option value="numberOfIngredients">Number of Ingredients</option>
+</select>
+<table border="1" id="recipeTable">
+    <thead>
         <tr>
             <th>Name</th>
             <th>Author</th>
@@ -41,28 +42,31 @@
             <th>Skill Level</th>
             <th>Actions</th>
         </tr>
+    </thead>
+    <tbody>
         <% recipeTableHTML.forEach(recipe => { %>
-            <tr data-description="<%= recipe.description %>" 
-                data-ingredients="<%= (recipe.ingredients || []).join(', ') %>" 
-                data-cooking-time="<%= recipe.cookingTime %>" 
-                data-preparation-time="<%= recipe.preparationTime %>">
-                <td><%= recipe.name %></td>
-                <td><%= recipe.author %></td>
-                <td><%= recipe.numberOfIngredients %></td>
-                <td><%= recipe.skillLevel %></td>
-                <td><button class="recipe-details-button" data-id="<%= recipe.id %>">View Details</button></td>
-            </tr>
-            
+        <tr data-description="<%= recipe.description %>" 
+            data-ingredients="<%= (recipe.ingredients || []).join(', ') %>" 
+            data-cooking-time="<%= recipe.cookingTime %>" 
+            data-preparation-time="<%= recipe.preparationTime %>">
+            <td><%= recipe.name %></td>
+            <td><%= recipe.author %></td>
+            <td><%= recipe.numberOfIngredients %></td>
+            <td><%= recipe.skillLevel %></td>
+            <td><button class="recipe-details-button" data-id="<%= recipe.id %>">View Details</button></td>
+        </tr>
         <% }); %>
-    </table>
+    </tbody>
+</table>
 
-    <div id="recipeModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="recipeDetails"></div>
-        </div>
+<div id="recipeModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="recipeDetails"></div>
     </div>
-
-    <script src="/scripts.js"> </script>
+</div>
+<script src="/scripts.js"></script>
+</main>
+</div>
 </body>
 </html>
