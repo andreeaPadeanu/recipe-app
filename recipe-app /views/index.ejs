@@ -27,12 +27,15 @@
       <button type="submit">Search</button>
     </form>
 </header>
-<label for="sortBy">Sort by:</label>
-<select id="sortBy">
-    <option value="name">Alphabetical</option>
-    <option value="skillLevel">Skill Level</option>
-    <option value="numberOfIngredients">Number of Ingredients</option>
-</select>
+<div class="sort-by-container">
+    <label for="sortBy">Sort by:</label>
+    <select id="sortBy">
+        <option value="name">Alphabetical</option>
+        <option value="skillLevel">Skill Level</option>
+        <option value="numberOfIngredients">Number of Ingredients</option>
+    </select>
+</div>
+
 <table border="1" id="recipeTable">
     <thead>
         <tr>
@@ -58,6 +61,21 @@
         <% }); %>
     </tbody>
 </table>
+
+<div class="pagination">
+    <a href="/?page=1">« First</a>
+    <% if (currentPage > 1) { %>
+        <a href="/?page=<%= currentPage - 1 %>">&lsaquo; Prev</a>
+    <% } %>
+    <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+        <a <% if (i === currentPage) { %>class="active"<% } %> href="/?page=<%= i %>"><%= i %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+        <a href="/?page=<%= currentPage + 1 %>">Next &rsaquo;</a>
+    <% } %>
+    <a href="/?page=<%= totalPages %>">Last »</a>
+</div>
+
 
 <div id="recipeModal" class="modal">
     <div class="modal-content">

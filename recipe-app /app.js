@@ -22,9 +22,12 @@ const handleErrors = (res, error) => {
 };
 
 app.get('/', async (req, res) => {
-    const session = driver.session(); 
+    const currentPage = parseInt(req.query.page) || 1;
+    const limit = 20; // Number of items per page
+
     try {
-        const { skip, limit, search } = req.query;
+        const { search } = req.query;
+
         let query = 'MATCH (r:Recipe)';
         let params = {};
 
@@ -36,16 +39,25 @@ app.get('/', async (req, res) => {
         query += ' OPTIONAL MATCH (r)-[:CONTAINS_INGREDIENT]->(i:Ingredient)';
         query += ' OPTIONAL MATCH (a:Author)-[:WROTE]->(r)';
         query += ' RETURN r, collect(distinct i) as ingredients, collect(distinct a.name) as authors, r.description as description, r.skillLevel as skillLevel';
-        query += ' ORDER BY r.name'; 
-       
-        if (skip !== undefined && limit !== undefined) {
-            query += ' SKIP toInteger($skip) LIMIT toInteger($limit)';
-        } else {
-            query += ' SKIP 0 LIMIT 20';
-        }
+        query += ' ORDER BY r.name';
 
-        const result = await session.run(query, { skip: parseInt(skip) || 0, limit: parseInt(limit) || 20, ...params });
-        const recipes = result.records.map(record => {
+        const result = await session.run(query, { ...params });
+
+        // Calculate total number of recipes
+        const totalCount = result.records.length;
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalCount / limit);
+
+        // Calculate offset
+        const offset = (currentPage - 1) * limit;
+
+        // Adjust query for pagination
+        query += ` SKIP ${offset} LIMIT ${limit}`;
+
+        const paginatedResult = await session.run(query, { ...params });
+
+        const recipes = paginatedResult.records.map(record => {
             const recipe = record.get('r').properties;
             const authors = record.get('authors').join(', ');
             const ingredients = record.get('ingredients').map(ingredient => ingredient.properties.name);
@@ -63,18 +75,18 @@ app.get('/', async (req, res) => {
                 ingredients: ingredients || []
             };
         });
-          
-
-          const recipesJson = JSON.stringify(recipes); 
-        res.render('index', { search: req.query.search || '', recipeTableHTML: recipes });
+        res.render('index', { 
+            search: search || '', 
+            recipeTableHTML: recipes, 
+            totalPages, 
+            currentPage 
+        });
+        
+        
     } catch (error) {
         handleErrors(res, error);
-    } finally {
-        await session.close(); 
     }
 });
-
-
 
 app.get('/authors', async (req, res) => {
     try {

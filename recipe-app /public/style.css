@@ -187,5 +187,35 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
+  .sort-by-container {
+    display: flex;
+    align-items: center; /* Vertically center the items */
+    margin-bottom: 10px; /* Adjust as needed */
+}
 
+.sort-by-container label {
+    margin-right: 10px; /* Adjust as needed to create space between label and dropdown */
+}
+
+
+
+  .pagination {
+    text-align: center;
+    margin-top: 20px; /* Adjust as needed */
+}
+
+.pagination a {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 5px;
+    color: #333;
+    border: 1px solid #ccc;
+    text-decoration: none;
+}
+
+.pagination a.active {
+    background-color: #9cadce;
+    color: #fff;
+    border-color: #9cadce;
+}
 

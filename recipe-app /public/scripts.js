@@ -235,27 +235,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener("DOMContentLoaded", function() {
     const pagination = document.querySelector(".pagination");
-    const currentPage = parseInt("<%= currentPage %>");
-    const totalPages = parseInt("<%= totalPages %>");
+    const totalPages = parseInt(pagination.dataset.totalPages);
 
     pagination.addEventListener("click", function(event) {
         event.preventDefault();
         const target = event.target;
 
         if (target.tagName === "A") {
-            const page = parseInt(target.textContent);
+            const currentPage = parseInt(document.querySelector(".pagination .active").textContent);
+            let page = currentPage;
 
-            if (!isNaN(page)) {
-                window.location.href = `/?page=${page}`;
-            } else if (target.textContent === "«") {
-                if (currentPage > 1) {
-                    window.location.href = `/?page=${currentPage - 1}`;
-                }
-            } else if (target.textContent === "»") {
-                if (currentPage < totalPages) {
-                    window.location.href = `/?page=${currentPage + 1}`;
-                }
+            if (target.textContent === "« First") {
+                page = 1;
+            } else if (target.textContent === "« Prev") {
+                page = Math.max(currentPage - 1, 1);
+            } else if (target.textContent === "Next »") {
+                page = Math.min(currentPage + 1, totalPages);
+            } else if (target.textContent === "Last »") {
+                page = totalPages;
+            } else {
+                page = parseInt(target.textContent);
             }
+
+            fetchAndDisplayRecipes(page);
         }
     });
+
+    function fetchAndDisplayRecipes(page) {
+        fetch(`/?page=${page}`)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const recipeTable = doc.querySelector("#recipeTable tbody");
+                const paginationContainer = doc.querySelector(".pagination");
+                const currentPageLink = paginationContainer.querySelector(".active");
+
+                document.querySelector("#recipeTable tbody").replaceWith(recipeTable);
+                document.querySelector(".pagination").replaceWith(paginationContainer);
+
+                if (currentPageLink) {
+                    window.history.pushState({}, "", `/?page=${currentPageLink.textContent}`);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    }
 });
