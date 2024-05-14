@@ -25,7 +25,6 @@ async function filterByIngredients() {
     }
 }
 document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM content loaded");
     var recipeDetailsButtons = document.querySelectorAll('.recipe-details-button');
     recipeDetailsButtons.forEach(function(button) {
         button.addEventListener('click', function() {
@@ -37,20 +36,53 @@ document.addEventListener("DOMContentLoaded", function() {
             var recipeCookingTime = recipeRow.dataset.cookingTime !== '-' ? parseInt(recipeRow.dataset.cookingTime) : 'N/A';
             var recipePreparationTime = recipeRow.dataset.preparationTime !== '-' ? parseInt(recipeRow.dataset.preparationTime) : 'N/A';
             var recipeDescription = recipeRow.dataset.description;
+            var recipeCollections = recipeRow.dataset.collections ? recipeRow.dataset.collections.split(', ') : [];
+            var recipeDietTypes = recipeRow.dataset.dietTypes ? recipeRow.dataset.dietTypes.split(', ') : [];
+            var recipeKeywords = recipeRow.dataset.keywords ? recipeRow.dataset.keywords.split(', ') : [];
+            
+
             recipeDetails.innerHTML = '<h2>' + recipeName + '</h2>' +
-                '<p><strong>Author:</strong> ' + recipeAuthor + '</p>' +
-                '<p><strong>Description:</strong> ' + recipeDescription + '</p>' +
-                '<p><strong>Cooking Time:</strong> ' + recipeCookingTime + ' minutes</p>' +
-                '<p><strong>Preparation Time:</strong> ' + recipePreparationTime + ' minutes</p>' +
-                '<p><strong>Ingredients:</strong> <ul>';
-            recipeIngredients.forEach(function(ingredient) {
-                recipeDetails.innerHTML += '<li>' + ingredient + '</li>';
+            '<p><strong>Author:</strong> ' + recipeAuthor + '</p>' +
+            '<p><strong>Description:</strong> ' + recipeDescription + '</p>' +
+            '<p><strong>Cooking Time:</strong> ' + recipeCookingTime + ' minutes</p>' +
+            '<p><strong>Preparation Time:</strong> ' + recipePreparationTime + ' minutes</p>' +
+            '<p><strong>Ingredients:</strong> <ul>';
+        
+        recipeIngredients.forEach(function(ingredient) {
+            recipeDetails.innerHTML += '<li>' + ingredient + '</li>';
+        });
+        
+        recipeDetails.innerHTML += '</ul></p>';
+        
+        if (recipeCollections.length > 0) {
+            recipeDetails.innerHTML += '<p><strong>Collections:</strong> <ul>';
+            recipeCollections.forEach(function(collection) {
+                recipeDetails.innerHTML += '<li>' + collection + '</li>';
             });
             recipeDetails.innerHTML += '</ul></p>';
-            modal.style.display = 'block';
+        }
+        
+        if (recipeDietTypes.length > 0) {
+            recipeDetails.innerHTML += '<p><strong>Diet Types:</strong> <ul>';
+            recipeDietTypes.forEach(function(dietType) {
+                recipeDetails.innerHTML += '<li>' + dietType + '</li>';
+            });
+            recipeDetails.innerHTML += '</ul></p>';
+        }
+        
+        if (recipeKeywords.length > 0) {
+            recipeDetails.innerHTML += '<p><strong>Keywords:</strong> <ul>';
+            recipeKeywords.forEach(function(keyword) {
+                recipeDetails.innerHTML += '<li>' + keyword + '</li>';
+            });
+            recipeDetails.innerHTML += '</ul></p>';
+        }
+        
+        modal.style.display = 'block';
         });
     });
 });
+
 
 
 document.addEventListener('DOMContentLoaded', function() {

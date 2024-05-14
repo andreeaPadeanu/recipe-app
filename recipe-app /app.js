@@ -1,12 +1,12 @@
 const express = require('express');
 const app = express();
 const neo4j = require('neo4j-driver');
+require('dotenv').config();
 
-const uri = 'neo4j://34.232.57.230:7687';
-const user = 'neo4j';
-const password = 'internship-2024';
-
-const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+const driver = neo4j.driver(
+    process.env.NEO4J_URI,
+    neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
+);
 const session = driver.session();
 
 app.set('view engine', 'ejs');
@@ -23,7 +23,7 @@ const handleErrors = (res, error) => {
 
 app.get('/', async (req, res) => {
     const currentPage = parseInt(req.query.page) || 1;
-    const limit = 20; // Number of items per page
+    const limit = 20; 
 
     try {
         const { search } = req.query;
@@ -38,21 +38,16 @@ app.get('/', async (req, res) => {
 
         query += ' OPTIONAL MATCH (r)-[:CONTAINS_INGREDIENT]->(i:Ingredient)';
         query += ' OPTIONAL MATCH (a:Author)-[:WROTE]->(r)';
-        query += ' RETURN r, collect(distinct i) as ingredients, collect(distinct a.name) as authors, r.description as description, r.skillLevel as skillLevel';
-        query += ' ORDER BY r.name';
-
+        query += ' OPTIONAL MATCH (r)-[:COLLECTION]->(c:Collection)';
+        query += ' OPTIONAL MATCH (r)-[:DIET_TYPE]->(d:DietType)';
+        query += ' OPTIONAL MATCH (r)-[:KEYWORD]->(k:Keyword)';
+        query += ' RETURN r, collect(distinct i) as ingredients, collect(distinct a.name) as authors, r.description as description, r.skillLevel as skillLevel, collect(distinct c.name) as collections, collect(distinct d.name) as dietTypes, collect(distinct k.name) as keywords';
+        
+        const session = driver.session(); 
         const result = await session.run(query, { ...params });
-
-        // Calculate total number of recipes
         const totalCount = result.records.length;
-
-        // Calculate total pages
         const totalPages = Math.ceil(totalCount / limit);
-
-        // Calculate offset
         const offset = (currentPage - 1) * limit;
-
-        // Adjust query for pagination
         query += ` SKIP ${offset} LIMIT ${limit}`;
 
         const paginatedResult = await session.run(query, { ...params });
@@ -63,16 +58,22 @@ app.get('/', async (req, res) => {
             const ingredients = record.get('ingredients').map(ingredient => ingredient.properties.name);
             const skillLevel = recipe.skillLevel;
             const numberOfIngredients = ingredients.length;
+            const collections = record.get('collections');
+            const dietTypes = record.get('dietTypes');
+            const keywords = record.get('keywords');
             return {
                 id: recipe.id,
                 name: recipe.name,
                 author: authors || '-',
                 numberOfIngredients: numberOfIngredients || '-',
                 cookingTime: recipe.cookingTime || '-',
-                preparationTime: recipe.preparationTime || '-', 
+                preparationTime: recipe.preparationTime || '-',
                 description: recipe.description || '-',
                 skillLevel: skillLevel || '-',
-                ingredients: ingredients || []
+                ingredients: ingredients || [],
+                collections: collections || [],
+                dietTypes: dietTypes || [],
+                keywords: keywords || []
             };
         });
         res.render('index', { 
@@ -81,12 +82,14 @@ app.get('/', async (req, res) => {
             totalPages, 
             currentPage 
         });
-        
+
+        session.close(); 
         
     } catch (error) {
         handleErrors(res, error);
     }
 });
+
 
 app.get('/authors', async (req, res) => {
     try {
@@ -170,10 +173,7 @@ app.get('/ingredients', async (req, res) => {
 
 
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+
+app.listen(process.env.PORT, () => {
+    console.log('Server is running on port', process.env.PORT);
 });
-
-
-
